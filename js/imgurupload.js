@@ -102,9 +102,7 @@
 			previewsContainer: previewCtx[0],
 			thumbnailWidth: 60,
 			thumbnailHeight: 60,
-			fallback: function ( ) {
-				
-			},
+			fallback: function ( ) { },
 			url: "https://api.imgur.com/3/upload",
 			headers: {
 				Authorization: "Client-ID " + gdn.definition("imgurclientid"),
@@ -121,7 +119,7 @@
 		var fileInput,
 			ta = $( "#Form_Body" ),
 			form = ta.parents( "form" ),
-			submitBtn = form.find( "[type=submit]" ),
+			submitBtn = form.find( "[type=submit]" ).last(),
 			previewCtx = $("<div/>", {
 				"class": "imguruploader-preview-ctx"
 			});
