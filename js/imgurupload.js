@@ -141,6 +141,7 @@
 				fileInput = $( "<a href=\"#\" class=\"Button ButtonAddImages\">Add Images</a>" );
 				submitBtn.before( fileInput );
 				fileInput.dropzone( getDropzoneConfig(ta, previewCtx, true) );
+				fileInput.on( "click", function ( e ) { e.preventDefault(); });
 
 			}
 
