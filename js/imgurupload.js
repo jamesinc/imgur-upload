@@ -56,7 +56,7 @@
 	var getLinkCode = function ( data ) {
 
 		var response,
-			type = gdn.definition( "InputFormat" );
+			type = gdn.definition( "imguruploadmarkupformat" );
 
 		switch ( type.toLowerCase() ) {
 			case "bbcode" :

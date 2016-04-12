@@ -115,6 +115,7 @@ class ImgurUploadPlugin extends Gdn_Plugin {
 		$ImgurClientID = C('Plugins.ImgurUpload.ClientID', '');
 		$ProcessImageURLs = C('Plugins.ImgurUpload.ProcessImageURLs', '');
 
+		$Controller->AddDefinition('imguruploadmarkupformat', c('Garden.InputFormatter', 'Html'));
 		// This becomes accessible in JS as gdn.definition("imgurclientid");
 		$Controller->AddDefinition('imgurclientid', $ImgurClientID);
 		$Controller->AddDefinition('processimageurls', $ProcessImageURLs);
