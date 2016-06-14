@@ -84,6 +84,12 @@
 
 	var getDropzoneConfig = function ( ta, previewCtx, clickable ) {
 		return {
+			sending: function ( ) {
+				ta.prop( "disabled", true );
+			},
+			queueComplete: function ( ) {
+				ta.prop( "disabled", false );
+			},
 			success: function ( file, response ) {
 				if ( response.success ) {
 					insertAtCursor( ta[0], getLinkCode(response.data) );
