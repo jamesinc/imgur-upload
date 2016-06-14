@@ -51,7 +51,11 @@
 }
 
 #Form_Body.dz-drag-hover {
-	background: #eee url(/plugins/ImgurUpload/design/drophere.png) no-repeat center;
+	background: #eee url(drophere.png) no-repeat center;
+}
+
+#Form_Body[disabled] {
+	background: #eee url(loading.gif) no-repeat center;
 }
 
 .Button.ButtonAddImages {
