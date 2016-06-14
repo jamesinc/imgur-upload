@@ -87,7 +87,7 @@
 			sending: function ( ) {
 				ta.prop( "disabled", true );
 			},
-			queueComplete: function ( ) {
+			queuecomplete: function ( ) {
 				ta.prop( "disabled", false );
 			},
 			success: function ( file, response ) {
