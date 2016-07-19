@@ -1,4 +1,4 @@
-/*global gdn, jQuery */
+/*global gdn, jQuery, Dropzone */
 /**
  * ImgurUpload, a drag'n'drop image upload tool for Vanilla Forums
  * Copyright (C) 2015  James Ducker <james.ducker@gmail.com>
@@ -122,7 +122,8 @@
 
 			// In discussions, conversations, etc, the main input is always #Form_Body,
 			// but all the other IDs change, so we'll find everything relative to this element.
-		var fileInput,
+		var dz,
+			fileInput,
 			ta = $( "#Form_Body" ),
 			form = ta.parents( "form" ),
 			submitBtn = form.find( "[type=submit]" ).last(),
@@ -130,24 +131,30 @@
 				"class": "imguruploader-preview-ctx"
 			});
 
+		// Don't bother doing anything if a textarea isn't found
+		if ( ta.length ) {
+
 			// Be lazy like me and just tell your users the good news, rather than
 			// trying to modify the UI to make it obvious that drag'n'drop is supported.
 			ta.attr( "placeholder", "You can now drag and drop images here to add them to your post! They will appear wherever your caret is." );
 			ta.after( previewCtx );
 			
 			// Setup the dropzone
-			ta.dropzone( getDropzoneConfig(ta, previewCtx, false) );
+			// Doing this the old-school way so that we can retain a reference
+			// to the Dropzone object for later use (the alternative being $.fn.dropzone();)
+			dz = new Dropzone( ta[0], getDropzoneConfig(ta, previewCtx, false) );
 
-			// If we are dealing with a touch-screen device, or a device that reports to be a touch-screen device,
-			// we should show a button also, as most touch-screen devices are mobiles, which don't support file drag'n'drop.
-			// This method isn't perfect but it's pretty effective.
-			if ( 'ontouchstart' in window ) {
+			// If we are dealing with a device that reports to be a touch-screen device,
+			// we should show a button also, as most touch-screen devices are mobiles,
+			// which don't support file drag'n'drop.
+			// (This method isn't perfect but it's pretty effective, I think.)
+			if ( "ontouchstart" in window ) {
 
 				ta.attr( "placeholder", "" );
-				fileInput = $( "<a href=\"#\" class=\"Button ButtonAddImages\">Add Images</a>" );
+				fileInput = $( "<a href=\"#\" class=\"Button ButtonAddImages\">Add Images</a>" )
+					.on( "click", function ( e ) { e.preventDefault(); });
 				submitBtn.before( fileInput );
 				fileInput.dropzone( getDropzoneConfig(ta, previewCtx, true) );
-				fileInput.on( "click", function ( e ) { e.preventDefault(); });
 
 			}
 
@@ -158,35 +165,55 @@
 
 			});
 
-		// Do some additional magic with image links
-		// Useful when users drag an image from another browser window
-		// This feature can be toggled in the plugin config page.
-		if ( gdn.definition("processimageurls") === "1" ) {
+			// Handle users pasting image data straight from the clipboard
+			ta.on( "paste", function ( e ) {
 
-			ta.on( "drop", function ( e ) {
+				var i, items = e.originalEvent.clipboardData.items;
 
-				var originalEvt = e.originalEvent,
-					data = e.originalEvent.dataTransfer.getData('URL');
+				// Loop through items on the clipboard
+				for ( i = 0; i < items.length; i++ ) {
 
-				if ( data.length ) {
+					// Check if item is of an image type
+					if ( items[i].kind === "file" && items[i].type.indexOf("image/") > -1 ) {
 
-					e.preventDefault();
-					e.stopPropagation();
-
-					if ( data.match(/([a-z\-_0-9\/\:\.]*\.(jpg|jpeg|png|gif))/i) ) {
-
-						insertAtCursor( ta[0], getLinkCode({link: data}) );
-
-					} else {
-
-						// Insert plaintext
-						insertAtCursor( ta[0], data );
+						// Trigger DropzoneJS's file add routine
+						dz.addFile( items[i].getAsFile() );
 
 					}
-
 				}
 
 			});
+
+			// Do some additional magic with image links
+			// Useful when users drag an image from another browser window
+			// This feature can be toggled in the plugin config page.
+			if ( gdn.definition("processimageurls") === "1" ) {
+
+				ta.on( "drop", function ( e ) {
+
+					var data = e.originalEvent.dataTransfer.getData('URL');
+
+					if ( data.length ) {
+
+						e.preventDefault();
+						e.stopPropagation();
+
+						if ( data.match(/([a-z\-_0-9\/\:\.]*\.(jpg|jpeg|png|gif))/i) ) {
+
+							insertAtCursor( ta[0], getLinkCode({link: data}) );
+
+						} else {
+
+							// Insert plaintext
+							insertAtCursor( ta[0], data );
+
+						}
+
+					}
+
+				});
+
+			}
 
 		}
 
