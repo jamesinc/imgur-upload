@@ -13,7 +13,7 @@
 // Define the plugin:
 $PluginInfo['ImgurUpload'] = array(
 	'Description' => 'Adds an image upload feature (with drag and drop!) that utilises the Imgur API',
-	'Version' => '1.0.10',
+	'Version' => '1.0.11',
 	'RequiredApplications' => array('Vanilla' => '2.1'),
 	'RequiredTheme' => FALSE,
 	'RequiredPlugins' => FALSE,
@@ -50,7 +50,14 @@ class ImgurUploadPlugin extends Gdn_Plugin {
 								'Description' => 'Check the below checkbox to have the plugin attempt to identify when the user is dragging in an image URL.
 												This is usually if the user is dragging an image across from another web page.
 												If an image URL is detected, it will be wrapped with image markup.'
+							),
+						'Plugins.ImgurUpload.ResizeImages' => array(
+								'LabelCode' => 'Resize images',
+								'Control' => 'Checkbox',
+								'Default' => C('Plugins.ImgurUpload.ResizeImages', ''),
+								'Description' => 'Check the below checkbox to display resized images that link to the original resolution image. Useful for speeding up page load when users are uploading lots of photos from phone cameras etc.'
 							)
+
 
 		);
 		$ConfigurationModule->Schema($Schema);
@@ -114,11 +121,13 @@ class ImgurUploadPlugin extends Gdn_Plugin {
 	protected function PrepareController($Controller) {
 		$ImgurClientID = C('Plugins.ImgurUpload.ClientID', '');
 		$ProcessImageURLs = C('Plugins.ImgurUpload.ProcessImageURLs', '');
+		$ResizeImages = C('Plugins.ImgurUpload.ResizeImages', '');
 
 		$Controller->AddDefinition('imguruploadmarkupformat', c('Garden.InputFormatter', 'Html'));
 		// This becomes accessible in JS as gdn.definition("imgurclientid");
 		$Controller->AddDefinition('imgurclientid', $ImgurClientID);
 		$Controller->AddDefinition('processimageurls', $ProcessImageURLs);
+		$Controller->AddDefinition('resizeimages', $ProcessImageURLs);
 		$Controller->AddJsFile('dropzone.min.js', 'plugins/ImgurUpload');
 		$Controller->AddJsFile('imgurupload.min.js', 'plugins/ImgurUpload');
 		$Controller->AddCssFile('imgurupload.css', 'plugins/ImgurUpload');

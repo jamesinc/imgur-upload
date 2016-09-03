@@ -55,22 +55,36 @@
 	// forum settings.
 	var getLinkCode = function ( data ) {
 
-		var response,
+		var response, thumbnail,
 			url = data.link.replace( /^http:/i, "https:" ),
+			resize = ( gdn.definition("resizeimages") === "1" ),
 			type = $( "#Form_Format" ).val();
+
+		if ( resize ) {
+
+			thumbnail = url.split( "." );
+			thumbnail[ thumbnail.length - 2 ] += "h";
+			thumbnail = thumbnail.join(".");
+
+		}
 
 		switch ( type.toLowerCase() ) {
 			case "bbcode" :
-				response = '[img]' + url + '[/img]';
+				response = ( resize ? '[url=' + url + '][img]' + thumbnail + '[/img][/url]' : '[img]' + url + '[/img]' );
 				break;
 
 			case "markdown" :
-				response = '![](' + url + ')';
+				response = ( resize ? '[![](' + thumbnail + ')](' + url + ')' : '![](' + url + ')' );
 				break;
 
 			case "html" :
 				// Specify width and height, so your users don't get annoyed with the page moving around as images load!
-				response = '<img src="' + url + '" alt="" width="' + data.width + '" height="' + data.height + '" />';
+				if ( resize ) {
+					response = '<a href="' + url + '" target="_new"><img src="' + thumbnail + '" alt="" /></a>';
+				} else {
+					response = '<img src="' + url + '" alt="" width="' + data.width + '" height="' + data.height + '" />';
+				}
+
 				break;
 
 			default :
