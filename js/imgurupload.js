@@ -56,24 +56,25 @@
 	var getLinkCode = function ( data ) {
 
 		var response,
+			url = data.link.replace( /^http:/i, "https:" ),
 			type = $( "#Form_Format" ).val();
 
 		switch ( type.toLowerCase() ) {
 			case "bbcode" :
-				response = '[img]' + data.link + '[/img]';
+				response = '[img]' + url + '[/img]';
 				break;
 
 			case "markdown" :
-				response = '![](' + data.link + ')';
+				response = '![](' + url + ')';
 				break;
 
 			case "html" :
 				// Specify width and height, so your users don't get annoyed with the page moving around as images load!
-				response = '<img src="' + data.link + '" alt="" width="' + data.width + '" height="' + data.height + '" />';
+				response = '<img src="' + url + '" alt="" width="' + data.width + '" height="' + data.height + '" />';
 				break;
 
 			default :
-				response = data.link;
+				response = url;
 				break;
 
 		}
