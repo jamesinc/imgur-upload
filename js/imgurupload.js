@@ -163,7 +163,7 @@
 			// we should show a button also, as most touch-screen devices are mobiles,
 			// which don't support file drag'n'drop.
 			// (This method isn't perfect but it's pretty effective, I think.)
-			if ( "ontouchstart" in window ) {
+			if ( "ontouchstart" in window || gdn.definition("showimagesbtn") === "1" ) {
 
 				ta.attr( "placeholder", "" );
 				fileInput = $( "<a href=\"#\" class=\"Button ButtonAddImages\">Add Images</a>" )
