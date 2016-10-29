@@ -13,7 +13,7 @@
 // Define the plugin:
 $PluginInfo['ImgurUpload'] = array(
 	'Description' => 'Adds an image upload feature (with drag and drop!) that utilises the Imgur API',
-	'Version' => '1.0.12',
+	'Version' => '1.0.13',
 	'RequiredApplications' => array('Vanilla' => '2.1'),
 	'RequiredTheme' => FALSE,
 	'RequiredPlugins' => FALSE,
@@ -62,6 +62,12 @@ class ImgurUploadPlugin extends Gdn_Plugin {
 								'Control' => 'Checkbox',
 								'Default' => C('Plugins.ImgurUpload.ShowImagesBtn', '1'),
 								'Description' => 'Check the below checkbox to display the \'Add Images\' button on desktop. If not checked, only mobile/touchscreen users will see the button. Desktop users will only be able to upload via drag\'n\'drop.'
+							),
+						'Plugins.ImgurUpload.EnableDragDrop' => array(
+								'LabelCode' => 'Allow drag\'n\'drop',
+								'Control' => 'Checkbox',
+								'Default' => C('Plugins.ImgurUpload.EnableDragDrop', '1'),
+								'Description' => 'Check the below checkbox to allow images to be drag\'n\'dropped onto the comment box.'
 							)
 
 
@@ -129,6 +135,7 @@ class ImgurUploadPlugin extends Gdn_Plugin {
 		$ProcessImageURLs = C('Plugins.ImgurUpload.ProcessImageURLs', '');
 		$ResizeImages = C('Plugins.ImgurUpload.ResizeImages', '');
 		$ShowImagesBtn = C('Plugins.ImgurUpload.ShowImagesBtn', '');
+		$EnableDragDrop = C('Plugins.ImgurUpload.EnableDragDrop', '');
 
 		$Controller->AddDefinition('imguruploadmarkupformat', c('Garden.InputFormatter', 'Html'));
 		// This becomes accessible in JS as gdn.definition("imgurclientid");
@@ -136,6 +143,7 @@ class ImgurUploadPlugin extends Gdn_Plugin {
 		$Controller->AddDefinition('processimageurls', $ProcessImageURLs);
 		$Controller->AddDefinition('resizeimages', $ProcessImageURLs);
 		$Controller->AddDefinition('showimagesbtn', $ShowImagesBtn);
+		$Controller->AddDefinition('enabledragdrop', $EnableDragDrop);
 		$Controller->AddJsFile('dropzone.min.js', 'plugins/ImgurUpload');
 		$Controller->AddJsFile('imgurupload.min.js', 'plugins/ImgurUpload');
 		$Controller->AddCssFile('imgurupload.css', 'plugins/ImgurUpload');

@@ -137,7 +137,7 @@
 
 			// In discussions, conversations, etc, the main input is always #Form_Body,
 			// but all the other IDs change, so we'll find everything relative to this element.
-		var dz,
+		var dzs = [ ],
 			fileInput,
 			ta = $( "#Form_Body" ),
 			form = ta.parents( "form" ),
@@ -155,9 +155,11 @@
 			ta.after( previewCtx );
 			
 			// Setup the dropzone
-			// Doing this the old-school way so that we can retain a reference
-			// to the Dropzone object for later use (the alternative being $.fn.dropzone();)
-			dz = new Dropzone( ta[0], getDropzoneConfig(ta, previewCtx, false) );
+			if ( gdn.definition("enabledragdrop") === "1" ) {
+
+				dzs.push( new Dropzone(ta[0], getDropzoneConfig(ta, previewCtx, false)) );
+
+			}
 
 			// If we are dealing with a device that reports to be a touch-screen device,
 			// we should show a button also, as most touch-screen devices are mobiles,
@@ -169,7 +171,7 @@
 				fileInput = $( "<a href=\"#\" class=\"Button ButtonAddImages\">Add Images</a>" )
 					.on( "click", function ( e ) { e.preventDefault(); });
 				submitBtn.before( fileInput );
-				fileInput.dropzone( getDropzoneConfig(ta, previewCtx, true) );
+				dzs.push( new Dropzone(fileInput[0], getDropzoneConfig(ta, previewCtx, true)) );
 
 			}
 
@@ -181,23 +183,27 @@
 			});
 
 			// Handle users pasting image data straight from the clipboard
-			ta.on( "paste", function ( e ) {
+			if ( dzs.length ) {
 
-				var i, items = e.originalEvent.clipboardData.items;
+				ta.on( "paste", function ( e ) {
 
-				// Loop through items on the clipboard
-				for ( i = 0; i < items.length; i++ ) {
+					var i, items = e.originalEvent.clipboardData.items;
 
-					// Check if item is of an image type
-					if ( items[i].kind === "file" && items[i].type.indexOf("image/") > -1 ) {
+					// Loop through items on the clipboard
+					for ( i = 0; i < items.length; i++ ) {
 
-						// Trigger DropzoneJS's file add routine
-						dz.addFile( items[i].getAsFile() );
+						// Check if item is of an image type
+						if ( items[i].kind === "file" && items[i].type.indexOf("image/") > -1 ) {
 
+							// Trigger DropzoneJS's file add routine
+							dzs[0].addFile( items[i].getAsFile() );
+
+						}
 					}
-				}
 
-			});
+				});
+
+			}
 
 			// Do some additional magic with image links
 			// Useful when users drag an image from another browser window
