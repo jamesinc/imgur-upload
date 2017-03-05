@@ -13,13 +13,13 @@
 // Define the plugin:
 $PluginInfo['ImgurUpload'] = array(
 	'Description' => 'Adds an image upload feature (with drag and drop!) that utilises the Imgur API',
-	'Version' => '1.0.13',
-	'RequiredApplications' => array('Vanilla' => '2.1'),
+	'Version' => '1.0.14',
+	'RequiredApplications' => array('Vanilla' => '2.4'),
 	'RequiredTheme' => FALSE,
 	'RequiredPlugins' => FALSE,
 	'HasLocale' => FALSE,
 	'MobileFriendly' => TRUE,
-	'SettingsUrl' => 'settings/imgurupload',
+	'SettingsUrl' => '/settings/ImgurUpload',
 	'SettingsPermission' => 'Garden.Settings.Manage',
 	'Author' => "James Ducker",
 	'AuthorEmail' => 'james.ducker@gmail.com',
@@ -31,53 +31,54 @@ class ImgurUploadPlugin extends Gdn_Plugin {
 
 	public function Setup() {}
 
-	public function SettingsController_ImgurUpload_Create($Sender) {
-		$Sender->Permission('Garden.Plugins.Manage');
-		$Sender->AddSideMenu('dashboard/settings/plugins');
-		$Sender->Title('ImgurUpload');
-		$ConfigurationModule = new ConfigurationModule($Sender);
-		$ConfigurationModule->RenderAll = True;
-		$Schema = array('Plugins.ImgurUpload.ClientID' => array(
-								'LabelCode' => 'Imgur API Client ID', 
-								'Control' => 'TextBox', 
-								'Default' => C('Plugins.ImgurUpload.ClientID', ''),
-								'Description' => 'Register for Imgur API access at: <a href="https://api.imgur.com/oauth2/addclient">https://api.imgur.com/oauth2/addclient</a>'
-							),
-						'Plugins.ImgurUpload.ProcessImageURLs' => array(
-								'LabelCode' => 'Process image URLs',
-								'Control' => 'Checkbox',
-								'Default' => C('Plugins.ImgurUpload.ProcessImageURLs', ''),
-								'Description' => 'Check the below checkbox to have the plugin attempt to identify when the user is dragging in an image URL.
+	/**
+     * Configure settings page in dashboard.
+     *
+     * @param SettingsController $sender
+     * @param array $args
+     */
+    public function SettingsController_ImgurUpload_Create($sender, $args) {
+        $sender->permission('Garden.Settings.Manage');
+
+        $cf = new ConfigurationModule($sender);
+
+        $cf->initialize(array('Plugins.ImgurUpload.ClientID' => array(
+            'LabelCode' => 'Imgur API Client ID',
+            'Control' => 'TextBox',
+            'Default' => C('Plugins.ImgurUpload.ClientID', ''),
+            'Description' => 'Register for Imgur API access at: <a href="https://api.imgur.com/oauth2/addclient">https://api.imgur.com/oauth2/addclient</a>'
+        ),
+            'Plugins.ImgurUpload.ProcessImageURLs' => array(
+                'LabelCode' => 'Process image URLs',
+                'Control' => 'Checkbox',
+                'Default' => C('Plugins.ImgurUpload.ProcessImageURLs', ''),
+                'Description' => 'Check the below checkbox to have the plugin attempt to identify when the user is dragging in an image URL.
 												This is usually if the user is dragging an image across from another web page.
 												If an image URL is detected, it will be wrapped with image markup.'
-							),
-						'Plugins.ImgurUpload.ResizeImages' => array(
-								'LabelCode' => 'Resize images',
-								'Control' => 'Checkbox',
-								'Default' => C('Plugins.ImgurUpload.ResizeImages', ''),
-								'Description' => 'Check the below checkbox to display resized images that link to the original resolution image. Useful for speeding up page load when users are uploading lots of photos from phone cameras etc.'
-							),
-						'Plugins.ImgurUpload.ShowImagesBtn' => array(
-								'LabelCode' => 'Show \'Add Images\' button on desktop',
-								'Control' => 'Checkbox',
-								'Default' => C('Plugins.ImgurUpload.ShowImagesBtn', '1'),
-								'Description' => 'Check the below checkbox to display the \'Add Images\' button on desktop. If not checked, only mobile/touchscreen users will see the button. Desktop users will only be able to upload via drag\'n\'drop.'
-							),
-						'Plugins.ImgurUpload.EnableDragDrop' => array(
-								'LabelCode' => 'Allow drag\'n\'drop',
-								'Control' => 'Checkbox',
-								'Default' => C('Plugins.ImgurUpload.EnableDragDrop', '1'),
-								'Description' => 'Check the below checkbox to allow images to be drag\'n\'dropped onto the comment box.'
-							)
-
-
-		);
-		$ConfigurationModule->Schema($Schema);
-		$ConfigurationModule->Initialize();
-		$Sender->View = dirname(__FILE__) . DS . 'views' . DS . 'settings.php';
-		$Sender->ConfigurationModule = $ConfigurationModule;
-		$Sender->Render();
-	}
+            ),
+            'Plugins.ImgurUpload.ResizeImages' => array(
+                'LabelCode' => 'Resize images',
+                'Control' => 'Checkbox',
+                'Default' => C('Plugins.ImgurUpload.ResizeImages', ''),
+                'Description' => 'Check the below checkbox to display resized images that link to the original resolution image. Useful for speeding up page load when users are uploading lots of photos from phone cameras etc.'
+            ),
+            'Plugins.ImgurUpload.ShowImagesBtn' => array(
+                'LabelCode' => 'Show \'Add Images\' button on desktop',
+                'Control' => 'Checkbox',
+                'Default' => C('Plugins.ImgurUpload.ShowImagesBtn', '1'),
+                'Description' => 'Check the below checkbox to display the \'Add Images\' button on desktop. If not checked, only mobile/touchscreen users will see the button. Desktop users will only be able to upload via drag\'n\'drop.'
+            ),
+            'Plugins.ImgurUpload.EnableDragDrop' => array(
+                'LabelCode' => 'Allow drag\'n\'drop',
+                'Control' => 'Checkbox',
+                'Default' => C('Plugins.ImgurUpload.EnableDragDrop', '1'),
+                'Description' => 'Check the below checkbox to allow images to be drag\'n\'dropped onto the comment box.'
+            )
+        ));
+        
+        $sender->setData('Title', t('ImgurUpload'));
+        $cf->renderAll();
+    }
 
 	/**
 	 * DiscussionController_Render_Before HOOK
