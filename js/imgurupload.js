@@ -21,6 +21,9 @@
 
 	"use strict";
 
+	// Stores Dropzone instances
+	var dzs = [ ];
+
 	// Inserts the given text at the caret position
 	// in the given input or textarea el.
 	var insertAtCursor = function ( el, text ) {
@@ -133,14 +136,11 @@
 
 	};
 
-	$(function ( ) {
+	var initTextarea = function ( ta ) {
 
-			// In discussions, conversations, etc, the main input is always #Form_Body,
-			// but all the other IDs change, so we'll find everything relative to this element.
-		var dzs = [ ],
-			fileInput,
-			ta = $( "#Form_Body" ),
+		var fileInput,
 			form = ta.parents( "form" ),
+			dzIdx = -1,
 			submitBtn = form.find( "[type=submit]" ).last(),
 			previewCtx = $("<div/>", {
 				"class": "imguruploader-preview-ctx"
@@ -158,6 +158,7 @@
 			if ( gdn.definition("enabledragdrop") === "1" ) {
 
 				dzs.push( new Dropzone(ta[0], getDropzoneConfig(ta, previewCtx, false)) );
+				dzIdx = dzs.length - 1;
 
 			}
 
@@ -183,7 +184,7 @@
 			});
 
 			// Handle users pasting image data straight from the clipboard
-			if ( dzs.length ) {
+			if ( dzIdx > -1 ) {
 
 				ta.on( "paste", function ( e ) {
 
@@ -196,7 +197,7 @@
 						if ( items[i].kind === "file" && items[i].type.indexOf("image/") > -1 ) {
 
 							// Trigger DropzoneJS's file add routine
-							dzs[0].addFile( items[i].getAsFile() );
+							dzs[dzIdx].addFile( items[i].getAsFile() );
 
 						}
 					}
@@ -237,6 +238,29 @@
 			}
 
 		}
+
+	};
+
+	$(function ( ) {
+
+		var ta = $( "#Form_Body" );
+
+		initTextarea( ta );
+
+		// Capture Vanilla's EditCommentFormLoaded event
+		// And add controls to any edit boxes that are generated
+		$( document ).on( "EditCommentFormLoaded", function ( ) {
+
+			// It's possible to have multiple textareas open at once,
+			// So we have to make sure to loop through all of them.
+			// initTextarea takes care of not re-initialising things.
+			$( ".EditCommentForm" ).find( "textarea" ).each( function ( ) {
+
+				initTextarea( $(this) );
+
+			});
+
+		});
 
 	});
 
