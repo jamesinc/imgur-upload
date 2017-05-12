@@ -170,7 +170,8 @@
 				}
 			},
 			// Queueing is handled manually by ImgurUpload plugin
-			autoQueue: canResize,
+			// if client-side resizing is supported
+			autoProcessQueue: !canResize,
 			// Accept all image types
 			acceptedFiles: "image/*",
 			paramName: "image",

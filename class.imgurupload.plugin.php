@@ -13,7 +13,7 @@
 // Define the plugin:
 $PluginInfo['ImgurUpload'] = array(
 	'Description' => 'Adds an image upload feature (with drag and drop!) that utilises the Imgur API',
-	'Version' => '1.1.2',
+	'Version' => '1.1.3',
 	'RequiredApplications' => array('Vanilla' => '2.1'),
 	'RequiredTheme' => FALSE,
 	'RequiredPlugins' => FALSE,
@@ -155,7 +155,7 @@ class ImgurUploadPlugin extends Gdn_Plugin {
 		// This becomes accessible in JS as gdn.definition("imgurclientid");
 		$Controller->AddDefinition('imgurclientid', $ImgurClientID);
 		$Controller->AddDefinition('processimageurls', $ProcessImageURLs);
-		$Controller->AddDefinition('resizeimages', $ProcessImageURLs);
+		$Controller->AddDefinition('resizeimages', $ResizeImages);
 		$Controller->AddDefinition('showimagesbtn', $ShowImagesBtn);
 		$Controller->AddDefinition('enabledragdrop', $EnableDragDrop);
 		$Controller->AddDefinition('imgmaxwidth', $ImgMaxWidth);
