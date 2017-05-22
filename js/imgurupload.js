@@ -215,7 +215,7 @@
 					// don't do anything.
 					if ( (MAX_WIDTH <= 0 || width <= MAX_WIDTH) && (MAX_HEIGHT <= 0 || height <= MAX_HEIGHT) ) {
 
-						dzs[dzIdx].enqueueFile( origFile );
+						dz.enqueueFile( origFile );
 						return;
 
 					}

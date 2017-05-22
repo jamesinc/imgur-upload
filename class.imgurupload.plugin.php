@@ -13,7 +13,7 @@
 // Define the plugin:
 $PluginInfo['ImgurUpload'] = array(
 	'Description' => 'Adds an image upload feature (with drag and drop!) that utilises the Imgur API',
-	'Version' => '1.1.5',
+	'Version' => '1.1.6',
 	'RequiredApplications' => array('Vanilla' => '2.1'),
 	'RequiredTheme' => FALSE,
 	'RequiredPlugins' => FALSE,
