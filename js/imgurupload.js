@@ -194,6 +194,9 @@
 
 	var initResizing = function ( dz ) {
 
+		// Skip if client-side resizing is not supported
+		if ( !canResize ) return;
+
 		// Downscale large images on the client
 		dz.on( "addedfile", function(origFile) {
 
