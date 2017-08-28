@@ -13,7 +13,7 @@
 // Define the plugin:
 $PluginInfo['ImgurUpload'] = array(
 	'Description' => 'Adds an image upload feature (with drag and drop!) that utilises the Imgur API',
-	'Version' => '1.1.9',
+	'Version' => '1.1.10',
 	'RequiredApplications' => array('Vanilla' => '2.1'),
 	'RequiredTheme' => FALSE,
 	'RequiredPlugins' => FALSE,
@@ -37,52 +37,53 @@ class ImgurUploadPlugin extends Gdn_Plugin {
 		$Sender->Title('ImgurUpload');
 		$ConfigurationModule = new ConfigurationModule($Sender);
 		$ConfigurationModule->RenderAll = True;
-		$Schema = array('Plugins.ImgurUpload.ClientID' => array(
-								'LabelCode' => 'Imgur API Client ID', 
-								'Control' => 'TextBox', 
-								'Default' => C('Plugins.ImgurUpload.ClientID', ''),
-								'Description' => 'Register for Imgur API access at: <a href="https://api.imgur.com/oauth2/addclient">https://api.imgur.com/oauth2/addclient</a>'
-							),
-						'Plugins.ImgurUpload.ProcessImageURLs' => array(
-								'LabelCode' => 'Process image URLs',
-								'Control' => 'Checkbox',
-								'Default' => C('Plugins.ImgurUpload.ProcessImageURLs', ''),
-								'Description' => 'Check the below checkbox to have the plugin attempt to identify when the user is dragging in an image URL.
-												This is usually if the user is dragging an image across from another web page.
-												If an image URL is detected, it will be wrapped with image markup.'
-							),
-						'Plugins.ImgurUpload.ResizeImages' => array(
-								'LabelCode' => 'Resize images',
-								'Control' => 'Checkbox',
-								'Default' => C('Plugins.ImgurUpload.ResizeImages', ''),
-								'Description' => 'Check the below checkbox to display resized images that link to the original resolution image. Useful for speeding up page load when users are uploading lots of photos from phone cameras etc.'
-							),
-						'Plugins.ImgurUpload.ShowImagesBtn' => array(
-								'LabelCode' => 'Show \'Add Images\' button on desktop',
-								'Control' => 'Checkbox',
-								'Default' => C('Plugins.ImgurUpload.ShowImagesBtn', '1'),
-								'Description' => 'Check the below checkbox to display the \'Add Images\' button on desktop. If not checked, only mobile/touchscreen users will see the button. Desktop users will only be able to upload via drag\'n\'drop.'
-							),
-						'Plugins.ImgurUpload.EnableDragDrop' => array(
-								'LabelCode' => 'Allow drag\'n\'drop',
-								'Control' => 'Checkbox',
-								'Default' => C('Plugins.ImgurUpload.EnableDragDrop', '1'),
-								'Description' => 'Check the below checkbox to allow images to be drag\'n\'dropped onto the comment box.'
-							),
-						'Plugins.ImgurUpload.ImgMaxWidth' => array(
-								'LabelCode' => 'Image max width',
-								'Control' => 'TextBox',
-								'Default' => C('Plugins.ImgurUpload.ImgMaxWidth', '0'),
-								'Description' => 'In pixels. Enter 0 to disable dimension limits.'
-							),
-						'Plugins.ImgurUpload.ImgMaxHeight' => array(
-								'LabelCode' => 'Image max height',
-								'Control' => 'TextBox',
-								'Default' => C('Plugins.ImgurUpload.ImgMaxHeight', '0'),
-								'Description' => 'In pixels. Enter 0 to disable dimension limits'
-							)
-
-
+		$Schema = array(
+			'Plugins.ImgurUpload.ClientID' => array(
+				'LabelCode' => 'Imgur API Client ID', 
+				'Control' => 'TextBox', 
+				'Default' => C('Plugins.ImgurUpload.ClientID', ''),
+				'Description' => 'Register for Imgur API access at: <a href="https://api.imgur.com/oauth2/addclient">https://api.imgur.com/oauth2/addclient</a>'
+			),
+			'Plugins.ImgurUpload.ProcessImageURLs' => array(
+				'LabelCode' => 'Process image URLs',
+				'Control' => 'Checkbox',
+				'Default' => C('Plugins.ImgurUpload.ProcessImageURLs', ''),
+				'Description' => 'Check the below checkbox to have the plugin attempt to identify when the user is dragging in an image URL.
+								This is usually if the user is dragging an image across from another web page.
+								If an image URL is detected, it will be wrapped with image markup.'
+			),
+			'Plugins.ImgurUpload.ResizeImages' => array(
+				'LabelCode' => 'Resize images',
+				'Control' => 'Checkbox',
+				'Default' => C('Plugins.ImgurUpload.ResizeImages', ''),
+				'Description' => 'Check the below checkbox to display resized images that link to the original resolution image. Useful for speeding up page load when users are uploading lots of photos from phone cameras etc.'
+			),
+			'Plugins.ImgurUpload.ShowImagesBtn' => array(
+				'LabelCode' => 'Show \'Add Images\' button on desktop',
+				'Control' => 'Checkbox',
+				'Default' => C('Plugins.ImgurUpload.ShowImagesBtn', '1'),
+				'Description' => 'Check the below checkbox to display the \'Add Images\' button on desktop. If not checked, only mobile/touchscreen users will see the button. Desktop users will only be able to upload via drag\'n\'drop.'
+			),
+			'Plugins.ImgurUpload.EnableDragDrop' => array(
+				'LabelCode' => 'Allow drag\'n\'drop',
+				'Control' => 'Checkbox',
+				'Default' => C('Plugins.ImgurUpload.EnableDragDrop', '1'),
+				'Description' => 'Check the below checkbox to allow images to be drag\'n\'dropped onto the comment box.'
+			),
+			'Plugins.ImgurUpload.ImgurThumbnailSuffix' => array(
+				'LabelCode' => 'Imgur Thumbnail suffix',
+				'Control' => 'RadioList',
+				'Default' => C('Plugins.ImgurUpload.ImgurThumbnailSuffix', 'h'),
+				'Items' => array(
+					's' => 'small square (90x90)',
+					'b' => 'big square (160x160)',
+					't' => 'small thumbnail (160x160)',
+					'm' => 'medium thumbnail (320x320)',
+					'l' => 'large thumbnail (640x640)',
+					'h' => 'huge thumbnail (1024x1024)'
+				),
+				'Description' => '(requires <em>Resize Images</em>) Imgur thumbnail suffix. See <a href="https://api.imgur.com/models/image#thumbs">here</a> for more information.'
+			)
 		);
 		$ConfigurationModule->Schema($Schema);
 		$ConfigurationModule->Initialize();
@@ -148,8 +149,7 @@ class ImgurUploadPlugin extends Gdn_Plugin {
 		$ResizeImages = C('Plugins.ImgurUpload.ResizeImages', '');
 		$ShowImagesBtn = C('Plugins.ImgurUpload.ShowImagesBtn', '');
 		$EnableDragDrop = C('Plugins.ImgurUpload.EnableDragDrop', '');
-		$ImgMaxWidth = C('Plugins.ImgurUpload.ImgMaxWidth', '0');
-		$ImgMaxHeight = C('Plugins.ImgurUpload.ImgMaxHeight', '0');
+		$ImgurThumbnailSuffix = C('Plugins.ImgurUpload.ImgurThumbnailSuffix', '');
 
 		$Controller->AddDefinition('imguruploadmarkupformat', c('Garden.InputFormatter', 'Html'));
 		// This becomes accessible in JS as gdn.definition("imgurclientid");
@@ -158,7 +158,7 @@ class ImgurUploadPlugin extends Gdn_Plugin {
 		$Controller->AddDefinition('resizeimages', $ResizeImages);
 		$Controller->AddDefinition('showimagesbtn', $ShowImagesBtn);
 		$Controller->AddDefinition('enabledragdrop', $EnableDragDrop);
-		$Controller->AddDefinition('imgmaxwidth', $ImgMaxWidth);
+		$Controller->AddDefinition('imgurthumbnailsuffix', $ImgurThumbnailSuffix);
 		$Controller->AddDefinition('imgmaxheight', $ImgMaxHeight);
 		$Controller->AddJsFile('dropzone.min.js', 'plugins/ImgurUpload');
 		$Controller->AddJsFile('imgurupload.min.js', 'plugins/ImgurUpload');

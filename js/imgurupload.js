@@ -24,58 +24,6 @@
 	// Stores Dropzone instances
 	var dzs = [ ];
 
-	// Check if browser can handle image resizing
-	var canResize = ( typeof Uint8Array === "function" ) &&
-			( typeof FileReader === "function" ) &&
-			( typeof Image === "function" ) &&
-			( typeof document.createElement("canvas") === "object" );
-
-	var base64ToFile = function (dataURI, origFile) {
-		var byteString, mimestring;
-
-		// Exit if unsupported browser
-		if ( !canResize ) return false;
-
-		if ( dataURI.split(',')[0].indexOf('base64') !== -1 ) {
-
-			byteString = atob(dataURI.split(',')[1]);
-
-		} else {
-
-			byteString = decodeURI(dataURI.split(',')[1]);
-	
-		}
-
-		mimestring = dataURI.split(',')[0].split(':')[1].split(';')[0];
-
-		var content = new Array();
-
-		for ( var i = 0; i < byteString.length; i++ ) {
-
-			content[i] = byteString.charCodeAt(i);
-
-		}
-
-		var newFile = new File(
-			[new Uint8Array(content)], origFile.name, {type: mimestring}
-		);
-
-
-		// Copy props set by the dropzone in the original file
-
-		var origProps = [ 
-			"upload", "status", "previewElement", "previewTemplate", "accepted" 
-		];
-
-		$.each( origProps, function(i, p) {
-
-			newFile[p] = origFile[p];
-
-		});
-
-		return newFile;
-	};
-
 	// Inserts the given text at the caret position
 	// in the given input or textarea el.
 	var insertAtCursor = function ( el, text ) {
@@ -112,13 +60,13 @@
 
 		var response, thumbnail,
 			url = data.link.replace( /^http:/i, "https:" ),
-			resize = ( gdn.definition("resizeimages") === "1" ),
+			resize = ( gdn.definition("resizeimages") === "1" && gdn.definition("imgurthumbnailsuffix").length === 1 ),
 			type = $( "#Form_Format" ).val();
 
 		if ( resize ) {
 
 			thumbnail = url.split( "." );
-			thumbnail[ thumbnail.length - 2 ] += "h";
+			thumbnail[ thumbnail.length - 2 ] += gdn.definition("imgurthumbnailsuffix");
 			thumbnail = thumbnail.join(".");
 
 		}
@@ -156,10 +104,10 @@
 
 		return {
 			sending: function ( ) {
-				//ta.prop( "disabled", true );
+				ta.prop( "disabled", true );
 			},
 			queuecomplete: function ( ) {
-				//ta.prop( "disabled", false );
+				ta.prop( "disabled", false );
 			},
 			success: function ( file, response ) {
 				if ( response.success ) {
@@ -169,9 +117,7 @@
 					alert( "Something went wrong trying to upload your images :( \n\nOur image host, imgur.com, may be having technical issues. Give it a few minutes and try again." );
 				}
 			},
-			// Queueing is handled manually by ImgurUpload plugin
-			// if client-side resizing is supported
-			autoQueue: !canResize,
+			autoQueue: true,
 			// Accept all image types
 			acceptedFiles: "image/*",
 			paramName: "image",
@@ -191,79 +137,6 @@
 		};
 
 	};
-
-	var initResizing = function ( dz ) {
-
-		// Skip if client-side resizing is not supported
-		if ( !canResize ) return;
-
-		// Downscale large images on the client
-		dz.on( "addedfile", function(origFile) {
-
-			var reader = new FileReader(),
-				MAX_WIDTH = Number( gdn.definition("imgmaxwidth") ) || -1,
-				MAX_HEIGHT = Number( gdn.definition( "imgmaxheight") ) || -1;
-
-			reader.addEventListener( "load", function ( e ) {
-
-				var origImg = new Image();
-				origImg.src = e.target.result;
-
-				origImg.addEventListener( "load", function ( e ) {
-
-					var width = e.target.width,
-						height = e.target.height;
-
-					// Image is already smaller than max sizes, or there is no max size,
-					// don't do anything.
-					if ( (MAX_WIDTH <= 0 || width <= MAX_WIDTH) && (MAX_HEIGHT <= 0 || height <= MAX_HEIGHT) ) {
-
-						dz.enqueueFile( origFile );
-						return;
-
-					}
-
-					// Calculate new image dimensions based on constraints
-					if ( width > height ) {
-						if ( width > MAX_WIDTH ) {
-							height *= MAX_WIDTH / width;
-							width = MAX_WIDTH;
-						}
-					} else {
-						if ( height > MAX_HEIGHT ) {
-							width *= MAX_HEIGHT  / height;
-							height = MAX_HEIGHT;
-						}
-					}
-
-					// Create canvas to render new image
-					var canvas = document.createElement( "canvas" );
-					canvas.width = width;
-					canvas.height = height;
-
-					var ctx = canvas.getContext( "2d" );
-
-					// Render image onto canvas
-					ctx.drawImage( origImg, 0, 0, width, height );
-
-					// Write out the resized image file
-					var resizedFile = base64ToFile( canvas.toDataURL("image/jpeg"), origFile );
-					// Overwrite the original image with the resized one
-					var origFileIndex = dz.files.indexOf( origFile );
-
-					dz.files[ origFileIndex ] = resizedFile;
-					// Now manually queue the file for Dropzone to process
-					dz.enqueueFile( resizedFile );
-
-				});
-
-			});
-
-			// Convert file to image
-			reader.readAsDataURL( origFile );
-
-		});
-	}
 
 	var initTextarea = function ( ta ) {
 
@@ -288,7 +161,6 @@
 
 				dzs.push( new Dropzone(ta[0], getDropzoneConfig(ta, previewCtx, false)) );
 				dzIdx = dzs.length - 1;
-				initResizing( dzs[dzs.length - 1] );
 
 			}
 
@@ -303,7 +175,6 @@
 					.on( "click", function ( e ) { e.preventDefault(); });
 				submitBtn.before( fileInput );
 				dzs.push( new Dropzone(fileInput[0], getDropzoneConfig(ta, previewCtx, true)) );
-				initResizing( dzs[dzs.length - 1] );
 
 			}
 
@@ -380,12 +251,12 @@
 
 		// Capture Vanilla's EditCommentFormLoaded event
 		// And add controls to any edit boxes that are generated
-		$( document ).on( "EditCommentFormLoaded", function ( e, ctx ) {
+		$( document ).on( "EditCommentFormLoaded", function ( ) {
 
 			// It's possible to have multiple textareas open at once,
 			// So we have to make sure to loop through all of them.
 			// initTextarea takes care of not re-initialising things.
-			ctx.find( ".EditCommentForm" ).find( "textarea" ).each( function ( ) {
+			$( ".EditCommentForm" ).find( "textarea" ).each( function ( ) {
 
 				initTextarea( $(this) );
 
