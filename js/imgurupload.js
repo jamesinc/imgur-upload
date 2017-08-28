@@ -251,12 +251,12 @@
 
 		// Capture Vanilla's EditCommentFormLoaded event
 		// And add controls to any edit boxes that are generated
-		$( document ).on( "EditCommentFormLoaded", function ( ) {
+		$( document ).on( "EditCommentFormLoaded", function ( e, ctx ) {
 
 			// It's possible to have multiple textareas open at once,
 			// So we have to make sure to loop through all of them.
 			// initTextarea takes care of not re-initialising things.
-			$( ".EditCommentForm" ).find( "textarea" ).each( function ( ) {
+			ctx.find( ".EditCommentForm" ).find( "textarea" ).each( function ( ) {
 
 				initTextarea( $(this) );
 
