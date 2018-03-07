@@ -102,7 +102,20 @@
 
 	var getDropzoneConfig = function ( ta, previewCtx, clickable ) {
 
+		var maxFilesizeMB = 10;
+
 		return {
+			init: function ( ) {
+				this.on( "error", function ( file, message ) {
+					if ( message.indexOf("File is too big") > -1 ) {
+						// Handle oversize file error a bit more nicely than default messaging
+						message = "File <strong>" + file.name + "</strong> is too large at " + Math.round(file.size/1024/1024*100)/100 + "MB. Max filesize is " + maxFilesizeMB + "MB.";
+					}
+
+					gdn.informError( message );
+					this.removeFile( file );
+				});
+			},
 			sending: function ( ) {
 				ta.prop( "disabled", true );
 			},
@@ -113,8 +126,7 @@
 				if ( response.success ) {
 					insertAtCursor( ta[0], getLinkCode(response.data) );
 				} else {
-					// ultra-basic error handling
-					alert( "Something went wrong trying to upload your images :( \n\nOur image host, imgur.com, may be having technical issues. Give it a few minutes and try again." );
+					gdn.informError( "Something went wrong while uploading your images. Our image host, imgur.com, may be having technical issues. Please try again in a few minutes." )
 				}
 			},
 			autoQueue: true,
@@ -123,7 +135,8 @@
 			paramName: "image",
 			clickable: clickable,
 			method: "post",
-			maxFilesize: 20,
+			// Imgur API max filesize is 10MB
+			maxFilesize: maxFilesizeMB,
 			maxFiles: 20,
 			previewsContainer: previewCtx[0],
 			thumbnailWidth: 60,
