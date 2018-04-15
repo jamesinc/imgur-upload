@@ -155,6 +155,8 @@
 
 		var fileInput,
 			form = ta.parents( "form" ),
+			helpTextWrap = form.find( ".bodybox-wrap" ),
+			imgurHelpText = helpTextWrap.find( ".imgur-help-text" ),
 			dzIdx = -1,
 			submitBtn = form.find( "[type=submit]" ).last(),
 			previewCtx = $("<div/>", {
@@ -164,11 +166,17 @@
 		// Don't bother doing anything if a textarea isn't found
 		if ( ta.length ) {
 
-			// Be lazy like me and just tell your users the good news, rather than
-			// trying to modify the UI to make it obvious that drag'n'drop is supported.
-			ta.attr( "placeholder", "You can now drag and drop images here to add them to your post! They will appear wherever your caret is." );
 			ta.after( previewCtx );
 			
+			if ( helpTextWrap.length && ! imgurHelpText.length ) {
+
+				$("<div/>", {
+					"class": "editor-help-text imgur-help-text",
+					text: "You can drag and drop images into the comment box."
+				}).appendTo( helpTextWrap );
+
+			}
+
 			// Setup the dropzone
 			if ( gdn.definition("enabledragdrop") === "1" ) {
 
@@ -183,7 +191,6 @@
 			// (This method isn't perfect but it's pretty effective, I think.)
 			if ( "ontouchstart" in window || gdn.definition("showimagesbtn") === "1" ) {
 
-				ta.attr( "placeholder", "" );
 				fileInput = $( "<a href=\"#\" class=\"Button ButtonAddImages\">Add Images</a>" )
 					.on( "click", function ( e ) { e.preventDefault(); });
 				submitBtn.before( fileInput );
