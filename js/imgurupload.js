@@ -171,7 +171,7 @@
 			if ( helpTextWrap.length && ! imgurHelpText.length ) {
 
 				$("<div/>", {
-					"class": "editor-help-text imgur-help-text",
+					"class": "imgur-help-text",
 					text: "You can drag and drop images into the comment box."
 				}).appendTo( helpTextWrap );
 
